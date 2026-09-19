@@ -4,7 +4,7 @@ import 'note_details_state.dart';
 
 class NoteDetailsCubit extends Cubit<NoteDetailsState> {
   final NotesRepository repository;
-  final String noteId;
+  final int noteId;
 
   NoteDetailsCubit(this.repository, this.noteId)
       : super(const NoteDetailsLoading());

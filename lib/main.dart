@@ -4,52 +4,70 @@ import 'app_router.dart';
 import 'cubit/notes_cubit.dart';
 import 'cubit/theme_cubit.dart';
 import 'cubit/theme_state.dart';
-import 'data/local_data_source.dart';
+import 'data/app_database.dart';
+import 'data/notes_local_data_source.dart';
 import 'data/notes_repository.dart';
+import 'data/settings_local_data_source.dart';
 import 'data/settings_repository.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  MyApp({super.key, AppDatabase? database})
+      : database = database ?? AppDatabase();
 
   final appRouter = AppRouter();
-  final localDataSource = LocalDataSource();
+  late final routerConfig = appRouter.config();
+  final AppDatabase database;
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider(
-          create: (context) => NotesCubit(NotesRepository(localDataSource)),
+        RepositoryProvider(
+          create: (context) => NotesRepository(NotesLocalDataSource(database)),
         ),
-        BlocProvider(
-          create: (context) =>
-              ThemeCubit(SettingsRepository(localDataSource))..loadTheme(),
+        RepositoryProvider(
+          create: (context) => SettingsRepository(SettingsLocalDataSource()),
         ),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, themeState) {
-          return MaterialApp.router(
-            title: 'Заметки',
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-              useMaterial3: true,
-            ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.indigo,
-                brightness: Brightness.dark,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => NotesCubit(context.read<NotesRepository>()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                ThemeCubit(context.read<SettingsRepository>())..loadTheme(),
+          ),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, state) {
+            return MaterialApp.router(
+              title: 'Заметки',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.indigo,
+                  brightness: Brightness.light,
+                ),
+                useMaterial3: true,
               ),
-              useMaterial3: true,
-            ),
-            themeMode: themeState.isDark ? ThemeMode.dark : ThemeMode.light,
-            routerConfig: appRouter.config(),
-          );
-        },
+              darkTheme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.indigo,
+                  brightness: Brightness.dark,
+                ),
+                useMaterial3: true,
+              ),
+              themeMode: state.isDark ? ThemeMode.dark : ThemeMode.light,
+              routerConfig: routerConfig,
+            );
+          },
+        ),
       ),
     );
   }

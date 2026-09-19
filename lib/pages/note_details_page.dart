@@ -1,17 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../app_router.dart';
 import '../cubit/note_details_cubit.dart';
 import '../cubit/note_details_state.dart';
 import '../cubit/notes_cubit.dart';
 import '../data/notes_repository.dart';
 import '../models/note.dart';
 import '../widgets/delete_dialog.dart';
+import '../widgets/note_dialog.dart';
 
 @RoutePage()
 class NoteDetailsPage extends StatelessWidget {
-  final String noteId;
+  final int noteId;
 
   const NoteDetailsPage({super.key, required this.noteId});
 
@@ -28,11 +28,17 @@ class NoteDetailsPage extends StatelessWidget {
 class NoteDetailsView extends StatelessWidget {
   const NoteDetailsView({super.key});
 
-  Future<void> openEdit(BuildContext context, Note note) async {
+  Future<void> editNote(BuildContext context, Note note) async {
     final cubit = context.read<NoteDetailsCubit>();
-    await context.router.push(EditNoteRoute(note: note));
-    if (!cubit.isClosed) {
-      cubit.loadNote();
+    final messenger = ScaffoldMessenger.of(context);
+    final saved = await showNoteDialog(context, note);
+    if (saved) {
+      if (!cubit.isClosed) {
+        cubit.loadNote();
+      }
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Заметка изменена')),
+      );
     }
   }
 
@@ -114,7 +120,7 @@ class NoteDetailsView extends StatelessWidget {
               if (state is NoteDetailsLoaded) ...[
                 IconButton(
                   onPressed: () {
-                    openEdit(context, state.note);
+                    editNote(context, state.note);
                   },
                   icon: const Icon(Icons.edit),
                 ),

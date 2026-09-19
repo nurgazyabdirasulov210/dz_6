@@ -20,12 +20,7 @@ class NotesCubit extends Cubit<NotesState> {
 
   Future<void> addNote(String title, String text) async {
     try {
-      final note = Note(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: title,
-        text: text,
-      );
-      await repository.addNote(note);
+      await repository.addNote(title, text);
       final notes = await repository.getNotes();
       emit(NotesLoaded(notes));
     } catch (e) {
@@ -43,7 +38,7 @@ class NotesCubit extends Cubit<NotesState> {
     }
   }
 
-  Future<void> deleteNote(String id) async {
+  Future<void> deleteNote(int id) async {
     try {
       await repository.deleteNote(id);
       final notes = await repository.getNotes();

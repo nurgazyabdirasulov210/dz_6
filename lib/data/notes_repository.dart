@@ -1,8 +1,8 @@
 import '../models/note.dart';
-import 'local_data_source.dart';
+import 'notes_local_data_source.dart';
 
 class NotesRepository {
-  final LocalDataSource localDataSource;
+  final NotesLocalDataSource localDataSource;
 
   NotesRepository(this.localDataSource);
 
@@ -10,34 +10,19 @@ class NotesRepository {
     return await localDataSource.getNotes();
   }
 
-  Future<Note?> getNoteById(String id) async {
-    final notes = await localDataSource.getNotes();
-    for (final note in notes) {
-      if (note.id == id) {
-        return note;
-      }
-    }
-    return null;
+  Future<Note?> getNoteById(int id) async {
+    return await localDataSource.getNoteById(id);
   }
 
-  Future<void> addNote(Note note) async {
-    final notes = await localDataSource.getNotes();
-    notes.insert(0, note);
-    await localDataSource.saveNotes(notes);
+  Future<void> addNote(String title, String text) async {
+    await localDataSource.addNote(title, text);
   }
 
   Future<void> updateNote(Note note) async {
-    final notes = await localDataSource.getNotes();
-    final index = notes.indexWhere((e) => e.id == note.id);
-    if (index != -1) {
-      notes[index] = note;
-      await localDataSource.saveNotes(notes);
-    }
+    await localDataSource.updateNote(note);
   }
 
-  Future<void> deleteNote(String id) async {
-    final notes = await localDataSource.getNotes();
-    notes.removeWhere((e) => e.id == id);
-    await localDataSource.saveNotes(notes);
+  Future<void> deleteNote(int id) async {
+    await localDataSource.deleteNote(id);
   }
 }

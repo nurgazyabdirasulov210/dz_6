@@ -1,7 +1,7 @@
-import 'local_data_source.dart';
+import 'settings_local_data_source.dart';
 
 class SettingsRepository {
-  final LocalDataSource localDataSource;
+  final SettingsLocalDataSource localDataSource;
 
   SettingsRepository(this.localDataSource);
 

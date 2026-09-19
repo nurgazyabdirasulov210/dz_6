@@ -5,6 +5,8 @@ import '../app_router.dart';
 import '../cubit/notes_cubit.dart';
 import '../cubit/notes_state.dart';
 import '../models/note.dart';
+import '../widgets/delete_dialog.dart';
+import '../widgets/note_dialog.dart';
 
 @RoutePage()
 class NotesPage extends StatefulWidget {
@@ -21,10 +23,6 @@ class _NotesPageState extends State<NotesPage> {
     context.read<NotesCubit>().loadNotes();
   }
 
-  void openEdit([Note? note]) {
-    context.router.push(EditNoteRoute(note: note));
-  }
-
   void openDetails(Note note) {
     context.router.push(NoteDetailsRoute(noteId: note.id));
   }
@@ -33,32 +31,27 @@ class _NotesPageState extends State<NotesPage> {
     context.router.push(const SettingsRoute());
   }
 
-  void deleteNote(Note note) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Удалить заметку?'),
-          content: const Text('Это действие нельзя отменить'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, false);
-              },
-              child: const Text('Отмена'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, true);
-              },
-              child: const Text('Удалить'),
-            ),
-          ],
-        );
-      },
-    );
+  void addNote() async {
+    final saved = await showNoteDialog(context);
+    if (saved && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Заметка добавлена')),
+      );
+    }
+  }
 
-    if (result == true && mounted) {
+  void editNote(Note note) async {
+    final saved = await showNoteDialog(context, note);
+    if (saved && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Заметка изменена')),
+      );
+    }
+  }
+
+  void deleteNote(Note note) async {
+    final confirmed = await showDeleteDialog(context);
+    if (confirmed && mounted) {
       context.read<NotesCubit>().deleteNote(note.id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Заметка удалена')),
@@ -80,9 +73,7 @@ class _NotesPageState extends State<NotesPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                openEdit();
-              },
+              onPressed: addNote,
               child: const Text('Создать первую заметку'),
             ),
             const SizedBox(height: 8),
@@ -144,6 +135,12 @@ class _NotesPageState extends State<NotesPage> {
               ),
               IconButton(
                 onPressed: () {
+                  editNote(note);
+                },
+                icon: const Icon(Icons.edit_outlined),
+              ),
+              IconButton(
+                onPressed: () {
                   deleteNote(note);
                 },
                 icon: const Icon(Icons.delete_outline),
@@ -195,7 +192,7 @@ class _NotesPageState extends State<NotesPage> {
         actions: [
           IconButton(
             onPressed: openSettings,
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.settings),
           ),
         ],
       ),
@@ -231,9 +228,7 @@ class _NotesPageState extends State<NotesPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          openEdit();
-        },
+        onPressed: addNote,
         child: const Icon(Icons.add),
       ),
     );

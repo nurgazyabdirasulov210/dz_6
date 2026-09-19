@@ -11,57 +11,11 @@
 part of 'app_router.dart';
 
 /// generated route for
-/// [EditNotePage]
-class EditNoteRoute extends PageRouteInfo<EditNoteRouteArgs> {
-  EditNoteRoute({Key? key, Note? note, List<PageRouteInfo>? children})
-      : super(
-          EditNoteRoute.name,
-          args: EditNoteRouteArgs(key: key, note: note),
-          initialChildren: children,
-        );
-
-  static const String name = 'EditNoteRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<EditNoteRouteArgs>(
-        orElse: () => const EditNoteRouteArgs(),
-      );
-      return EditNotePage(key: args.key, note: args.note);
-    },
-  );
-}
-
-class EditNoteRouteArgs {
-  const EditNoteRouteArgs({this.key, this.note});
-
-  final Key? key;
-
-  final Note? note;
-
-  @override
-  String toString() {
-    return 'EditNoteRouteArgs{key: $key, note: $note}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! EditNoteRouteArgs) return false;
-    return key == other.key && note == other.note;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ note.hashCode;
-}
-
-/// generated route for
 /// [NoteDetailsPage]
 class NoteDetailsRoute extends PageRouteInfo<NoteDetailsRouteArgs> {
   NoteDetailsRoute({
     Key? key,
-    required String noteId,
+    required int noteId,
     List<PageRouteInfo>? children,
   }) : super(
           NoteDetailsRoute.name,
@@ -85,7 +39,7 @@ class NoteDetailsRouteArgs {
 
   final Key? key;
 
-  final String noteId;
+  final int noteId;
 
   @override
   String toString() {
